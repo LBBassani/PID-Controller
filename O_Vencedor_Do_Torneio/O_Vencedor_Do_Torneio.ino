@@ -1,13 +1,14 @@
-/*
- * PID3piLineFollower - demo code for the Pololu 3pi Robot
- * 
- * This code will follow a black line on a white background, using a
- * PID-based algorithm.
- *
- * http://www.pololu.com/docs/0J21
- * http://www.pololu.com
- * http://forum.pololu.com
- *
+/* Código de seguidor de linha PID para robô Pololu 3pi
+ * @author: Lorena Bassani
+ * @date: Julho 2021
+ * @version: 1.2
+ * @descrição:  Baseado no código demo de seguidor de linha, vencedor na GEAR RACE 2018, Linhares, ES. 
+ *                "This code will follow a black line on a white background, using a PID-based algorithm.
+ *                    http://www.pololu.com/docs/0J21
+ *                    http://www.pololu.com
+ *                    http://forum.pololu.com"
+ *                Roda um robô Pololu 3pi com algoritmo PID e controlável através de rede Wi-Fi através de um ESP32 conectado na porta serial.
+ *                Versão mais recente disponível em https://github.com/LBBassani/PID-Controller.
  */
 
 // The following libraries will be needed by this demo

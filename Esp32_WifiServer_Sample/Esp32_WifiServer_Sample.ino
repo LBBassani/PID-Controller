@@ -1,14 +1,26 @@
+/* Código de servidor Wi-Fi ESP32 para controlar robô Pololu 3pi
+ * @author: Lorena Bassani
+ * @date: Julho 2021
+ * @version: 1.1
+ * @descrição:  Baseado no tutorial "ESP32 WIFI: COMUNICAÇÃO COM A INTERNET" por Gustavo Teixeira. Acesso https://www.usinainfo.com.br/blog/esp32-wifi-comunicacao-com-a-internet/ em 29/07/2021.
+ *                Roda pequeno servidor disponibilizado na rede wi-fi local para configuração e controle de robô programado com controlador PID. Utilizado na realização de IC.
+ *                Versão mais recente disponível em https://github.com/LBBassani/PID-Controller.
+ */
+
 #include <WiFi.h>
 
 // Informações do servidor wi-fi
 const char* ssid = "lorena-notebook";
 const char* password = "ultrabots3";
 WiFiServer server(80);
+
+// Variáveis de resposta do servidor
 String texto = "HTTP/1.1 200 OK\nContent-type:text/html\n\n";
 String responses;
 
 void setup() {
 
+  // Construção do texto base da página HTML renderizada pelo servidor
   texto += "Click <a href=\"/R\">here</a> to make the robot run.<br>";
   texto += "Click <a href=\"/S\">here</a> to make the robot stop.<br>";
   texto += "Click <a href=\"/E\">here</a> to know the error.<br>";
