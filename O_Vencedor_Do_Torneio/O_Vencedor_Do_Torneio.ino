@@ -24,7 +24,9 @@ Pololu3pi robot;
 unsigned int sensors[5]; // an array to hold sensor values
 unsigned int last_proportional = 0;
 long integral = 0;
-
+long last_time = 0;
+long last_error = 0;
+float kp = 2/20, ki = 1/10000, kd = 17/10;
 
 // This include file allows data to be stored in program space.  The
 // ATmega168 has 16k of program space compared to 1k of RAM, so large
@@ -104,6 +106,10 @@ void display_readings(const unsigned int *calibrated_values)
 // by the Arduino framework at the start of program execution.
 void setup()
 {
+
+  Serial.begin(9600);
+  bool rodando = false;
+  
   unsigned int counter; // used as a simple timer
 
   // This must be called at the beginning of 3pi code, to set up the
@@ -203,38 +209,96 @@ void loop()
   // Get the position of the line.  Note that we *must* provide
   // the "sensors" argument to read_line() here, even though we
   // are not interested in the individual sensor readings.
-  unsigned int position = robot.readLine(sensors, IR_EMITTERS_ON);
 
-  // The "proportional" term should be 0 when we are on the line.
-  int proportional = (int)position - 2000;
+  // Comunicação de controle da ESP
+  /* r : rodar (run)
+   * s : parar (stop)
+   * k- : responder os parametros do controlador
+   * kp : configurar kp
+   * ki : configurar ki
+   * kd : configurar kd
+   * e- : resetar contagem do erro médio
+   * e+ : responder contagem do erro médio
+   */
+  if(Serial.available()){
+    byte leitura = Serial.read();
+    switch(leitura){
+      case('r'):
+        rodando = true;
+        break;
+      case('s'):
+        rodando = false;
+        break;
+      case('k'):
+        byte comando = Serial.read();
+        switch(comando):
+          case('-'):
+            String resp = "Kp = " + String(kp) + ", Ki = " + String(ki) + ", Kd = " + String(kd);
+            Serial.write(resp);
+            break;
+          case('d'):
+            kd = Serial.parseFloat();
+            break;
+          case('i'):
+            ki = Serial.parseFloat();
+            break;
+          case('p'):
+            kp = Serial.parseFloat();
+            break;
+      case('e'):
+        byte comando = Serial.read();
+        switch(comando):
+          case('-'):
+            last_error = 0;
+            last_time = millis();
+            break;
+          case('+'):
+            String resp = String(last_error/(float)(millis() - last_time));
+            Serial.write(resp);
+            break;
+    }
+  }
 
-  // Compute the derivative (change) and integral (sum) of the
-  // position.
-  int derivative = proportional - last_proportional;
-  integral += proportional;
-
-  // Remember the last position.
-  last_proportional = proportional;
-
-  // Compute the difference between the two motor power settings,
-  // m1 - m2.  If this is a positive number the robot will turn
-  // to the right.  If it is a negative number, the robot will
-  // turn to the left, and the magnitude of the number determines
-  // the sharpness of the turn.  You can adjust the constants by which
-  // the proportional, integral, and derivative terms are multiplied to
-  // improve performance.
-  int power_difference = proportional*2/20 + integral/10000 + derivative*17/10;
-
-  // Compute the actual motor settings.  We never set either motor
-  // to a negative value.
-  const int maximum = 200 ;
-  if (power_difference > maximum)
-    power_difference = maximum;
-  if (power_difference < -maximum)
-    power_difference = -maximum;
-
-  if (power_difference < 0)
-    OrangutanMotors::setSpeeds(maximum + power_difference, maximum);
-  else
-    OrangutanMotors::setSpeeds(maximum, maximum - power_difference);
+  // Se puder rodar
+  if(rodando){
+    unsigned int position = robot.readLine(sensors, IR_EMITTERS_ON);
+  
+    // The "proportional" term should be 0 when we are on the line.
+    int proportional = (int)position - 2000;
+    last_error += abs(proportional);
+  
+    // Compute the derivative (change) and integral (sum) of the
+    // position.
+    int derivative = proportional - last_proportional;
+    integral += proportional;
+  
+    // Remember the last position.
+    last_proportional = proportional;
+  
+    // Compute the difference between the two motor power settings,
+    // m1 - m2.  If this is a positive number the robot will turn
+    // to the right.  If it is a negative number, the robot will
+    // turn to the left, and the magnitude of the number determines
+    // the sharpness of the turn.  You can adjust the constants by which
+    // the proportional, integral, and derivative terms are multiplied to
+    // improve performance.
+    int power_difference = proportional*kp + integral*ki + derivative*kd;
+  
+    // Compute the actual motor settings.  We never set either motor
+    // to a negative value.
+    const int maximum = 200 ;
+    if (power_difference > maximum)
+      power_difference = maximum;
+    if (power_difference < -maximum)
+      power_difference = -maximum;
+  
+    if (power_difference < 0)
+      OrangutanMotors::setSpeeds(maximum + power_difference, maximum);
+    else
+      OrangutanMotors::setSpeeds(maximum, maximum - power_difference);
+  }
+  // Caso não puder rodar
+  else{
+    OrangutanMotors::setSpeeds(0, 0);
+  }
 }
