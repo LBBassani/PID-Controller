@@ -28,6 +28,7 @@ long integral = 0;
 long last_time = 0;
 long last_error = 0;
 float kp = 2/20, ki = 1/10000, kd = 17/10;
+bool rodando = false;
 
 // This include file allows data to be stored in program space.  The
 // ATmega168 has 16k of program space compared to 1k of RAM, so large
@@ -109,7 +110,6 @@ void setup()
 {
 
   Serial.begin(9600);
-  bool rodando = false;
   
   unsigned int counter; // used as a simple timer
 
@@ -223,6 +223,7 @@ void loop()
    */
   if(Serial.available()){
     byte leitura = Serial.read();
+    byte comando;
     switch(leitura){
       case('r'):
         rodando = true;
@@ -231,11 +232,11 @@ void loop()
         rodando = false;
         break;
       case('k'):
-        byte comando = Serial.read();
-        switch(comando):
+        comando = Serial.read();
+        switch(comando){
           case('-'):
             String resp = "Kp = " + String(kp) + ", Ki = " + String(ki) + ", Kd = " + String(kd);
-            Serial.write(resp);
+            Serial.write(resp.c_str());
             break;
           case('d'):
             kd = Serial.parseFloat();
@@ -246,17 +247,21 @@ void loop()
           case('p'):
             kp = Serial.parseFloat();
             break;
+        }
+        break;
       case('e'):
-        byte comando = Serial.read();
-        switch(comando):
+        comando = Serial.read();
+        switch(comando){
           case('-'):
             last_error = 0;
             last_time = millis();
             break;
           case('+'):
             String resp = String(last_error/(float)(millis() - last_time));
-            Serial.write(resp);
+            Serial.write(resp.c_str());
             break;
+        }
+        break;
     }
   }
 
