@@ -223,44 +223,50 @@ void loop()
    */
   if(Serial.available()){
     byte leitura = Serial.read();
-    byte comando;
+    String resp;
     switch(leitura){
       case('r'):
         rodando = true;
+        OrangutanLCD::clear();
+        OrangutanLCD::print("RUNNING.");
         break;
       case('s'):
         rodando = false;
+        OrangutanLCD::clear();
+        OrangutanLCD::print("STOPED.");
         break;
-      case('k'):
-        comando = Serial.read();
-        switch(comando){
-          case('-'):
-            String resp = "Kp = " + String(kp) + ", Ki = " + String(ki) + ", Kd = " + String(kd);
-            Serial.write(resp.c_str());
-            break;
-          case('d'):
-            kd = Serial.parseFloat();
-            break;
-          case('i'):
-            ki = Serial.parseFloat();
-            break;
-          case('p'):
-            kp = Serial.parseFloat();
-            break;
-        }
+      case('w'):
+        resp = "Kp = " + String(kp, 12) + ", Ki = " + String(ki, 12) + ", Kd = " + String(kd, 12);
+        Serial.println(resp.c_str());
+        OrangutanLCD::clear();
+        OrangutanLCD::print("PID.");
+        break;
+      case('d'):
+        kd = Serial.parseFloat();
+        OrangutanLCD::clear();
+        OrangutanLCD::print("Conf. kd");
+        break;
+      case('i'):
+        ki = Serial.parseFloat();
+        OrangutanLCD::clear();
+        OrangutanLCD::print("Conf. ki");
+        break;
+      case('p'):
+        kp = Serial.parseFloat();
+        OrangutanLCD::clear();
+        OrangutanLCD::print("Conf. kp");
+        break;
+      case('z'):
+        last_error = 0;
+        last_time = millis();
+        OrangutanLCD::clear();
+        OrangutanLCD::print("RST ERROR.");
         break;
       case('e'):
-        comando = Serial.read();
-        switch(comando){
-          case('-'):
-            last_error = 0;
-            last_time = millis();
-            break;
-          case('+'):
-            String resp = String(last_error/(float)(millis() - last_time));
-            Serial.write(resp.c_str());
-            break;
-        }
+        resp = String(1000*last_error/(float)(millis() - last_time), 12);
+        Serial.write(resp.c_str());
+        OrangutanLCD::clear();
+        OrangutanLCD::print("SND ERROR.");
         break;
     }
   }

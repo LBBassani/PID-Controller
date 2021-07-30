@@ -75,7 +75,10 @@ void loop() {
           Serial.write("s");
         }
         if (currentLine.endsWith("GET /P")){
-          Serial.write("k-");
+          Serial.write("w");
+          while(!Serial.available()){
+            
+          }
           responses += "[" + String(millis()) + "] " + Serial.readString() + "<br>";
         }
         if (currentLine.endsWith("GET /K")){
@@ -87,16 +90,20 @@ void loop() {
           int index1 = currentLine.indexOf("kp");
           currentLine = currentLine.substring(index1);
           currentLine.replace("&", "");
-          currentLine.replace("=","");
+          currentLine.replace("=", "");
+          currentLine.replace("k", "");
           Serial.println(currentLine);
         }
         if (currentLine.endsWith("GET /E")) {
-          Serial.write("e+");
+          Serial.write("e");
+          while(!Serial.available()){
+            
+          }
           float error = Serial.parseFloat();
-          responses += "[" + String(millis()) + "] Error at " + String(error) + "<br>";
+          responses += "[" + String(millis()) + "] Error at " + String(error, 6) + "<br>";
         }
         if (currentLine.endsWith("GET /RESET")){
-          Serial.write("e-");
+          Serial.write("z");
         }
         if (currentLine.endsWith("GET /CLEAR")){
           responses = String();
