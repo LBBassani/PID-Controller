@@ -22,7 +22,8 @@ void setup() {
 
   // Construção do texto base da página HTML renderizada pelo servidor
   texto += "Click <a href=\"/R\">here</a> to make the robot run.<br>";
-  texto += "Click <a href=\"/S\">here</a> to make the robot stop.<br>";
+  texto += "Click <a href=\"/STOP\">here</a> to make the robot stop.<br>";
+  texto += "Click <a href=\"/SPEED\">here</a> to know the maximum speed.<br>";
   texto += "Click <a href=\"/E\">here</a> to know the error.<br>";
   texto += "Click <a href=\"/RESET\">here</a> to reset the error.<br>";
   texto += "Click <a href=\"/P\">here</a> to know the PID parameters.<br>";
@@ -33,6 +34,11 @@ void setup() {
     texto += "<input type=\"text\" id=\"ki\" name=\"ki\"><br>";
     texto += "<label for=\"kd\">Kd: </label>";
     texto += "<input type=\"text\" id=\"kd\" name=\"kd\"><br>";
+    texto += "<input type=\"submit\" value=\"Submit\">";
+  texto += "</form></p><br>";
+  texto += "<p><form action=\"/M\">";
+    texto += "<label for=\"m\">Maximum: </label>";
+    texto += "<input type=\"text\" id=\"m\" name=\"m\"><br>";
     texto += "<input type=\"submit\" value=\"Submit\">";
   texto += "</form></p><br>";
   texto += "RESPONSES<hr>Click <a href=\"/CLEAR\">here</a> to clear responses.<br><br>";
@@ -71,7 +77,7 @@ void loop() {
         if (currentLine.endsWith("GET /R")) {
           Serial.write("r");
         }
-        if (currentLine.endsWith("GET /S")) {
+        if (currentLine.endsWith("GET /STOP")) {
           Serial.write("s");
         }
         if (currentLine.endsWith("GET /P")){
@@ -81,17 +87,34 @@ void loop() {
           }
           responses += "[" + String(millis()) + "] " + Serial.readString() + "<br>";
         }
+        if (currentLine.endsWith("GET /SPEED")){
+          Serial.write("g");
+          while(!Serial.available()){
+            
+          }
+          responses += "[" + String(millis()) + "] Maximum speed: " + Serial.readString() + "<br>";
+        }
         if (currentLine.endsWith("GET /K")){
           do{
             c = client.read();
             currentLine += c;
           }while(c != ' ');
-          Serial.println(currentLine);
           int index1 = currentLine.indexOf("kp");
           currentLine = currentLine.substring(index1);
           currentLine.replace("&", "");
           currentLine.replace("=", "");
           currentLine.replace("k", "");
+          Serial.println(currentLine);
+        }
+        if (currentLine.endsWith("GET /M")) {
+          do{
+            c = client.read();
+            currentLine += c;
+          }while(c != ' ');
+          int index1 = currentLine.indexOf("m");
+          currentLine = currentLine.substring(index1);
+          currentLine.replace("&", "");
+          currentLine.replace("=", "");
           Serial.println(currentLine);
         }
         if (currentLine.endsWith("GET /E")) {

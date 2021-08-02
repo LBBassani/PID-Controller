@@ -29,6 +29,7 @@ long last_time = 0;
 long last_error = 0;
 float kp = 2/20, ki = 1/10000, kd = 17/10;
 bool rodando = false;
+int maximum = 200;
 
 // This include file allows data to be stored in program space.  The
 // ATmega168 has 16k of program space compared to 1k of RAM, so large
@@ -236,7 +237,7 @@ void loop()
         OrangutanLCD::print("STOPED.");
         break;
       case('w'):
-        resp = "Kp = " + String(kp, 12) + ", Ki = " + String(ki, 12) + ", Kd = " + String(kd, 12);
+        resp = "'Kp' : " + String(kp, 12) + ", 'Ki' : " + String(ki, 12) + ", 'Kd' : " + String(kd, 12);
         Serial.println(resp.c_str());
         OrangutanLCD::clear();
         OrangutanLCD::print("PID.");
@@ -268,6 +269,14 @@ void loop()
         OrangutanLCD::clear();
         OrangutanLCD::print("SND ERROR.");
         break;
+      case('m'):
+        maximum = Serial.parseInt();
+        if (maximum < 0) maximum = 0;
+        if (maximum > 200) maximum = 200;
+        break;
+      case('g'):
+        Serial.write(String(maximum));
+        break;
     }
   }
 
@@ -298,7 +307,6 @@ void loop()
   
     // Compute the actual motor settings.  We never set either motor
     // to a negative value.
-    const int maximum = 200 ;
     if (power_difference > maximum)
       power_difference = maximum;
     if (power_difference < -maximum)
