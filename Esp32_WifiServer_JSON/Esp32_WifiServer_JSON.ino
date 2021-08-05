@@ -55,7 +55,6 @@ void loop() {
     while (client.connected()) {
       if (client.available()) {
         char c = client.read();
-        Serial.print(c);
         if (c == '\n') {
           if (currentLine.length() == 0) {
             
@@ -70,17 +69,17 @@ void loop() {
           client.println(texto);
         }
         if (currentLine.endsWith("GET /R")) {
-          //Serial.write("r");
+          Serial.write("r");
           response = response_header + "{}";
           client.print(response);
         }
         if (currentLine.endsWith("GET /STOP")) {
-          //Serial.write("s");
+          Serial.write("s");
           response = response_header + "{}";
           client.print(response);
         }
         if (currentLine.endsWith("GET /P")){
-          //Serial.write("w");
+          Serial.write("w");
           while(!Serial.available()){
             
           }
@@ -88,7 +87,7 @@ void loop() {
           client.print(response);
         }
         if (currentLine.endsWith("GET /SPEED")){
-          //Serial.write("g");
+          Serial.write("g");
           while(!Serial.available()){
             
           }
@@ -105,7 +104,7 @@ void loop() {
           currentLine.replace("&", "");
           currentLine.replace("=", "");
           currentLine.replace("k", "");
-          //Serial.println(currentLine);
+          Serial.println(currentLine);
           response = response_header + "{}";
           client.print(response);
         }
@@ -118,12 +117,12 @@ void loop() {
           currentLine = currentLine.substring(index1);
           currentLine.replace("&", "");
           currentLine.replace("=", "");
-          //Serial.println(currentLine);
+          Serial.println(currentLine);
           response = response_header + "{}";
           client.print(response);
         }
         if (currentLine.endsWith("GET /E")) {
-          //Serial.write("e");
+          Serial.write("e");
           while(!Serial.available()){
             
           }
@@ -132,7 +131,7 @@ void loop() {
           client.print(response);
         }
         if (currentLine.endsWith("GET /RESET")){
-          //Serial.write("z");
+          Serial.write("z");
           response = response_header + "{}";
           client.print(response);
         }
